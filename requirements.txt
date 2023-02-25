@@ -1,0 +1,5 @@
+# pth to project folder
+# /home/tomide/Documents/GitHub/vinsights/vinsight
+
+# project name vinsight
+

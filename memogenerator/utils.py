@@ -18,8 +18,7 @@ import dns.resolver
 import socket
 from dotenv import load_dotenv
 load_dotenv()
-openai.api_key = "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"
-
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 class TomideBeautifulSoupUtils:
     def __init__(self, url, type, scroll):

@@ -62,10 +62,12 @@ class DataConsumer(views.APIView):
         company_data = JSONParser().parse(request)
         company_serializer = serializers.CompanySerializers(data=company_data)
         print(company_serializer)
-        if company_serializer.is_valid():
-            response = generate_mad_memo(
-                company_data.name, company_data.website, company_data.pitch)
-            return JsonResponse({data: response})
-        else:
-            print(company_serializer.errors)
-            return Response('Yo.. there was an error .... these things happen')
+        # if company_serializer.is_valid():company_name
+
+        response = generate_mad_memo(
+            company_data['name'], company_data['website'], company_data['pitch'])
+
+        return JsonResponse({'data': response})
+        # else:
+        #     print(company_serializer.errors)response
+        #     return Response('Yo.. there was an error .... these things happen')
