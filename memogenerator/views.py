@@ -56,7 +56,8 @@ class FileUploadView(views.APIView):
 class DataConsumer(views.APIView):
     def get(self, request, *args, **kwargs):
         print("get")
-        return Response(request.data)
+        
+        return JsonResponse({'data': 'Tomide is the motherfucking boss'})
 
     def post(self, request, *args, **kwargs):
         company_data = JSONParser().parse(request)
