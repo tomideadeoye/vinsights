@@ -5,22 +5,18 @@ import dj_database_url
 from dotenv import load_dotenv
 load_dotenv()
 
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
-# DEBUG = os.getenv("DEBUG", "False") == "True"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS"
-                          ).split(",")
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'mediafiles')
 MEDIA_URL = '/media/'
 
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS"
+                          ).split(",")
 
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -73,8 +69,6 @@ TEMPLATES = [
 
 
 WSGI_APPLICATION = 'vinsight.wsgi.application'
-
-
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
 # if DEVELOPMENT_MODE is True:
@@ -91,8 +85,6 @@ DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 #         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
 #     }
 
-# Password validation
-# https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -110,11 +102,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
