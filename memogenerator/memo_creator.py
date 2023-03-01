@@ -10,11 +10,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
-def generate_mad_memo(company_name, company_website, pitch_deck):
+def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
     directory = './mediafiles/Africa/'
 
     pitch_deck = 'Pivo Pitch Deck - Main (1).pdf'
@@ -23,36 +22,44 @@ def generate_mad_memo(company_name, company_website, pitch_deck):
 
     reader = PdfReader(f'{directory}{pitch_deck}')
 
-    pitch_deck_content = ' '.join([ page.extract_text().strip() for page in reader.pages ])
+    pitch_deck_content = ' '.join(
+        [page.extract_text().strip() for page in reader.pages])
 
-    website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(company_website, 'incognitp', False)
+    website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
+        company_website, 'incognitp', False)
     dataset = pitch_deck_content + website_content[0].text.strip()
 
-    print(f'Deck: {len(pitch_deck_content)} | Website: {len(website_content[0].text.strip())} | Dataset: {len(dataset)} / Token: {len(dataset) / 4}')
+    print(
+        f'Deck: {len(pitch_deck_content)} | Website: {len(website_content[0].text.strip())} | Dataset: {len(dataset)} / Token: {len(dataset) / 4}')
 
-    dataset = ' '.join([ dataset.replace(thing, '') for thing in ['\n', 'all rights reserved', '©', '®', '™', ] ])
+    dataset = ' '.join([dataset.replace(thing, '') for thing in [
+                       '\n', 'all rights reserved', '©', '®', '™', ]])
     dataset = ' '.join(dataset.split()[0:1200])
     emails = re.findall(r'[\w\.-]+@[\w\.-]+', dataset)
 
-    founder_google_search = ''.join(founder['snippet'] + ' ' + founder['htmlSnippet'] for founder in google_search(f'{company_name} startup founders'))
-    founder_google_search = founder_google_search.strip().replace('<b>', '').replace('</b>', '')    
+    founder_google_search = ''.join(founder['snippet'] + ' ' + founder['htmlSnippet']
+                                    for founder in google_search(f'{company_name} startup founders'))
+    founder_google_search = founder_google_search.strip().replace('<b>',
+                                                                  '').replace('</b>', '')
 
-    funding_raise_google_search =  ''.join(funding['snippet'] + ' ' + funding['htmlSnippet'] for funding in google_search(f'{company_name} funding raise'))
-    funding_raise_google_search = funding_raise_google_search.strip().replace('</b>', '').replace('<b>', '')
+    funding_raise_google_search = ''.join(
+        funding['snippet'] + ' ' + funding['htmlSnippet'] for funding in google_search(f'{company_name} funding raise'))
+    funding_raise_google_search = funding_raise_google_search.strip().replace('</b>',
+                                                                              '').replace('<b>', '')
 
     class Prompts:
         what_they_do = "extract what the company does from the data here "
-        
+
         hundred_x_justification = "based on the available data how can the company make 100x return? What will it have to be valued at to make that return? Is the market large enough to allow the company to grow to a 100x? And does the company and the team have what it takes to attain that feat?"
         traction = "extract traction from the data here Is the product at MVP or further. How far along in development are they?"
-        
+
         team = "extract founders names and details from the data here"
         founder_vision = "extract founder's vision from the data here What is the founder’s vision for the company or market and why? What are the founder's motivation and what drives them?"
-        
+
         business_model = "extract business model from the data here How does the company make its money?"
         funding = "extract funding from the data here"
         use_of_funds = "extract use of funds from the data here What does the team plan to use this raise for? "
-        
+
         industry = "extract industry from the data here What industry is the company in?"
         market = "extract market from the data here General Market outlook What is the size of the market? How has it grown over time? What portion of the market has the company decided that they can service?"
         risks = 'What are the risks that come with this company? A risk in their product, service, or business model? What could make it fail? What do they need to get absolutely perfect to ensure they succeed?'
@@ -62,7 +69,7 @@ def generate_mad_memo(company_name, company_website, pitch_deck):
         growth = "extract growth from the data here"
         competition = "extract competition from the data here"
         exit_opp = "extract exit from the data here"
-        
+
         contact = "extract contact phone and emailfrom the data here"
         website = "extract website from the data here"
         location = "extract the company's location from the data here"
@@ -74,20 +81,19 @@ def generate_mad_memo(company_name, company_website, pitch_deck):
 
         def query_gpt(self):
             response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt= self.query+ '' + self.dataset,
-            temperature=0.7,
-            max_tokens=2009,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0)
+                engine="text-davinci-003",
+                prompt=self.query + '' + self.dataset,
+                temperature=0.7,
+                max_tokens=2009,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0)
             print(response.choices[0].text.strip())
             return response.choices[0].text.strip()
 
-
     class MemoCreator:
         def memoCreate():
-            
+
             memo = f'''
     <==========INVESTMENT MEMO============>
     # generate a word document with this content
@@ -157,5 +163,10 @@ def generate_mad_memo(company_name, company_website, pitch_deck):
     '''
 
             return memo
+
+    response = MemoCreator.memoCreate()
+    if email_to:
+        subject = f'Investment Memo for {company_name}'
+        TomsEmailUtilities.send_email(email_to, subject, response, [])
 
     return MemoCreator.memoCreate()
