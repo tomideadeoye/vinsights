@@ -1,6 +1,7 @@
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
 from PyPDF2 import PdfReader
+from datetime import datetime
 import openai
 import os
 from urllib.request import Request, urlopen
@@ -10,15 +11,16 @@ import smtplib
 import ssl
 from email.message import EmailMessage
 import datetime
-import time
 from selenium import webdriver
 import re
 import smtplib
 import dns.resolver
 import socket
 from dotenv import load_dotenv
+from docx import Document
 load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
+
 
 class TomideBeautifulSoupUtils:
     def __init__(self, url, type, scroll):
@@ -200,7 +202,6 @@ class TomsEmailUtilities:
         email_sender = os.getenv('email_sender')
         email_password = os.getenv('email_password')
         em = EmailMessage()
-        # em = MIMEMultipart()
         em['From'], em['To'], em['Subject'] = email_sender, email_receiver, subject
         em.set_content(body)
 
@@ -234,3 +235,17 @@ def google_search(query_for_google):
             if google_response['error']['code'] == 429:
                 continue
     print("NO KEYS WORKED", google_response['error']['message'])
+
+
+def create_document(title, body):
+    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    document = Document()
+    document.add_heading(title, 1)
+    document.add_paragraph(body)
+    document.add_page_break()
+    document.add_paragraph('Created at ' + created_at + ' by Tomide Adeoye')
+    document_name = f"""{title}-{created_at}.docx"""
+    document.save(document_name)
+    return document_name
+

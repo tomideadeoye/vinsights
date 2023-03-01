@@ -3,7 +3,7 @@ from PyPDF2 import PdfReader
 import re
 import os
 
-from memogenerator.utils import TomideBeautifulSoupUtils, google_search, TomsEmailUtilities
+from memogenerator.utils import TomideBeautifulSoupUtils, google_search, TomsEmailUtilities, create_document
 from dotenv import load_dotenv
 
 
@@ -14,19 +14,17 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
 def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
+    print(company_name, company_website, pitch_deck, email_to)
     directory = './mediafiles/Africa/'
-
     pitch_deck = 'Pivo Pitch Deck - Main (1).pdf'
 
-    print(f'{directory}{pitch_deck}')
-
     reader = PdfReader(f'{directory}{pitch_deck}')
-
     pitch_deck_content = ' '.join(
         [page.extract_text().strip() for page in reader.pages])
 
     website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
         company_website, 'incognitp', False)
+    print('website_content', website_content)
     dataset = pitch_deck_content + website_content[0].text.strip()
 
     print(
@@ -89,76 +87,87 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
                 frequency_penalty=0,
                 presence_penalty=0)
             print(response.choices[0].text.strip())
-            return response.choices[0].text.strip()
+            return response.choices[0].text.strip() + '\n'
 
     class MemoCreator:
         def memoCreate():
 
             memo = f'''
-    <==========INVESTMENT MEMO============>
-    # generate a word document with this content
+<=====================INVESTMENT MEMO=====================> \n
 
-    WHAT THEY DO: 
-    {QueryGpt(Prompts.what_they_do, dataset).query_gpt()}
+WHAT THEY DO:
+=========================================================== \n 
+{QueryGpt(Prompts.what_they_do, dataset).query_gpt()}  
 
-    QueryGpt(Prompts.hundred_x_justification, dataset).query_gpt()
+DECK | WEBSITE 
+=========================================================== \n 
+{company_website if company_website else QueryGpt(Prompts.website, dataset).query_gpt()}
 
-    DECK | WEBSITE 
-    # store in db and generate link
-    {company_website if company_website else QueryGpt(Prompts.website, dataset).query_gpt()} | link to pictchdeck
+ROUND DETAILS
+===========================================================  \n
+Terms: How much are we investing and what valuation?
+Stage: Pre-Seed/Seed/Series ABC?
+Co-Investors: If any?
+Information Rights: 
+Pro-Rata:
+City: {QueryGpt(Prompts.location, dataset).query_gpt()}
+Sex:
+Industry: {QueryGpt(Prompts.industry, dataset).query_gpt()}   
 
-    ROUND DETAILS
-    Terms: How much are we investing and what valuation?
-    Stage: Pre-Seed/Seed/Series ABC?
-    Co-Investors: If any?
-    Information Rights: 
-    Pro-Rata:
-    City: {QueryGpt(Prompts.location, dataset).query_gpt()}
-    Sex:
-    Industry: {QueryGpt(Prompts.industry, dataset).query_gpt()}
+TRACTION AND PROGRESS SO FAR:
+=========================================================== \n 
+{QueryGpt(Prompts.traction, dataset).query_gpt()}
 
-    TRACTION AND PROGRESS SO FAR:
-    {QueryGpt(Prompts.traction, dataset).query_gpt()}
+Founders: Founder Info from Linkedin and Execution Ability
+Are they repeat founders? Do they have other things going on? Do they have what it takes to achieve their vision?
+# pull data from Linkedin previously listed companies 
+{QueryGpt(Prompts.team, founder_google_search).query_gpt()}
 
-    Founders: Founder Info from Linkedin and Execution Ability
-    Are they repeat founders? Do they have other things going on? Do they have what it takes to achieve their vision?
-    # pull data from Linkedin previously listed companies 
-    {QueryGpt(Prompts.team, founder_google_search).query_gpt()}
+BUSINESS MODEL
+=========================================================== \n
+{QueryGpt(Prompts.business_model, dataset).query_gpt()} 
 
-    BUSINESS MODEL
-    {QueryGpt(Prompts.business_model, dataset).query_gpt()}
+FOUNDER'S VISION
+=========================================================== \n
+{QueryGpt(Prompts.founder_vision, founder_google_search).query_gpt()} 
 
-    FOUNDER'S VISION
-    {QueryGpt(Prompts.founder_vision, founder_google_search).query_gpt()}
+FUNDING:
+=========================================================== \n
+{QueryGpt(Prompts.funding, funding_raise_google_search).query_gpt()} 
 
-    FUNDING:
-    {QueryGpt(Prompts.funding, funding_raise_google_search).query_gpt()}
+USE OF FUNDS:
+=========================================================== \n
+{QueryGpt(Prompts.use_of_funds, dataset).query_gpt()}
 
-    USE OF FUNDS:
-    {QueryGpt(Prompts.use_of_funds, dataset).query_gpt()}
+PRODUCT/SERVICE:
+=========================================================== \n
+{QueryGpt(Prompts.products, dataset).query_gpt()} 
 
-    PRODUCT/SERVICE:
-    {QueryGpt(Prompts.products, dataset).query_gpt()}
+CONTACTS:
+=========================================================== \n
+{QueryGpt(Prompts.contact, dataset).query_gpt()} 
+emails: {' | '.join(emails)}
 
-    CONTACTS: :
-    {QueryGpt(Prompts.contact, dataset).query_gpt()}
-    emails: {' | '.join(emails)}
+MARKET OUTLOOK:
+=========================================================== \n
+{QueryGpt(Prompts.market, dataset).query_gpt()}
 
-    MARKET OUTLOOK
-    {QueryGpt(Prompts.market, dataset).query_gpt()}
+COMPETITION & DEFENSIBILITY:
+=========================================================== \n
+Who is their competition? How do they compare against each other? What is unique about this company that makes them stand out in the market? Feel free to use a table here to help compare
+# go online to fetch the data here and use exiting companies in the database
 
-    COMPETITION & DEFENSIBILITY
-    Who is their competition? How do they compare against each other? What is unique about this company that makes them stand out in the market? Feel free to use a table here to help compare
-    # go online to fetch the data here and use exiting companies in the database
+RISKS:
+=========================================================== \n
+{QueryGpt(Prompts.risks, dataset).query_gpt()}
 
-    RISKS
-    {QueryGpt(Prompts.risks, dataset).query_gpt()}
+SOCIALS:
+=========================================================== \n
+{' | '.join(website_content[1]['social_media_links'])}
 
-    Socials:
-    {' | '.join(website_content[1]['social_media_links'])}
-
-    Other Link:
-    {' | '.join(website_content[1]['internal_links'])}
+OTHER LINKS:
+=========================================================== \n
+{' | '.join(website_content[1]['internal_links'])}
 
     '''
 
@@ -167,6 +176,9 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
     response = MemoCreator.memoCreate()
     if email_to:
         subject = f'Investment Memo for {company_name}'
-        TomsEmailUtilities.send_email(email_to, subject, response, [])
+        
+        document_name  = create_document(f'''{company_name.upper()} Investment Memo Draft''', subject)
+
+        TomsEmailUtilities.send_email(email_to, subject, response, [document_name])
 
     return MemoCreator.memoCreate()
