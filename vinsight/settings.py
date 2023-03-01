@@ -43,7 +43,9 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8000',
-    'https://king-prawn-app-c9gz3.ondigitalocean.app'
+    'https://king-prawn-app-c9gz3.ondigitalocean.app',
+    "*"
+    "localhost:3000",
 
 )
 
