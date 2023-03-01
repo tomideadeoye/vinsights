@@ -14,10 +14,7 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'mediafiles')
 MEDIA_URL = '/media/'
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS"
-                          ).split(",")
-
-
+ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -47,6 +44,7 @@ CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8000',
     'https://king-prawn-app-c9gz3.ondigitalocean.app'
+
 )
 
 ROOT_URLCONF = 'vinsight.urls'
