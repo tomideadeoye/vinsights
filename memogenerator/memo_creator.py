@@ -82,7 +82,7 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
                 engine="text-davinci-003",
                 prompt=self.query + '' + self.dataset,
                 temperature=0.7,
-                max_tokens=2009,
+                max_tokens=1000,
                 top_p=1,
                 frequency_penalty=0,
                 presence_penalty=0)
