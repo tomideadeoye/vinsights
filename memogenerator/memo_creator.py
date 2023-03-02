@@ -176,9 +176,10 @@ OTHER LINKS:
     response = MemoCreator.memoCreate()
     if email_to:
         subject = f'Investment Memo for {company_name}'
-        
-        document_name  = create_document(f'''{company_name.upper()} Investment Memo Draft''', subject)
 
-        TomsEmailUtilities.send_email(email_to, subject, response, [document_name])
+        document_name = create_document(
+            f'''{company_name.upper()} Investment Memo Draft''', subject)
+
+        # TomsEmailUtilities.send_email(email_to, subject, response, [document_name])
 
     return MemoCreator.memoCreate()
