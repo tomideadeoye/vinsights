@@ -14,17 +14,20 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
 def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
-    
+
     directory = './mediafiles/Africa/'
-    pitch_deck = 'Pivo Pitch Deck - Main (1).pdf'
+    # pitch_deck = 'Pivo Pitch Deck - Main (1).pdf'
+    pitch_deck = pitch_deck
 
     reader = PdfReader(f'{directory}{pitch_deck}')
     pitch_deck_content = ' '.join(
         [page.extract_text().strip() for page in reader.pages])
 
     print(company_name, company_website, pitch_deck, email_to)
-    website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
-        company_website, 'incognitp', False)
+    # website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
+    #     company_website, 'incognitp', False)
+
+    website_content = ['']
     print('website_content', website_content)
     dataset = pitch_deck_content + website_content[0].text.strip()
 
@@ -181,6 +184,7 @@ OTHER LINKS:
         document_name = create_document(
             f'''{company_name.upper()} Investment Memo Draft''', subject)
 
-        # TomsEmailUtilities.send_email(email_to, subject, response, [document_name])
+        TomsEmailUtilities.send_email(
+            email_to, subject, response, [document_name])
 
     return MemoCreator.memoCreate()

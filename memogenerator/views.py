@@ -11,14 +11,20 @@ from rest_framework.generics import ListCreateAPIView
 
 class CompanyDataView(ListCreateAPIView):
 
+    # use modelviewset fro crud
+
     def post(self, request, *args, **kwargs):
         serializer_class = CompanySerializers
         company_data = JSONParser().parse(request)
         company_serializer = serializers.CompanySerializers(data=company_data)
         # if company_serializer.is_valid():company_name
 
-        response = generate_mad_memo(
-            company_data['name'], company_data['website'], company_data['pitch_uploaded'], company_data['emailTo'],)
+        # response = generate_mad_memo(
+        #     company_data['name'], company_data['website'], company_data['pitch_uploaded'], company_data['emailTo'],)
+
+        # send data to db
+
+        response = 'tom is awesome'
 
         return JsonResponse({"data": response})
     # else:
