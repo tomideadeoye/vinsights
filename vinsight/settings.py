@@ -50,11 +50,10 @@ MIDDLEWARE = [
 
 # )
 
-CORS_ALLOWED_ORIGINS = ['http://localhost:3001',
+CORS_ALLOWED_ORIGINS = ['https://vinsight.netlify.app', 'http://localhost:3001',
                         'https://king-prawn-app-c9gz3.ondigitalocean.app',
                         'http://localhost:3000',
                         'http://192.168.1.125:3000',
-                        'https://vinsight.netlify.app'
                         ]
 
 
