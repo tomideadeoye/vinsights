@@ -1,3 +1,4 @@
+from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
 from PyPDF2 import PdfReader
@@ -78,6 +79,10 @@ class TomideBeautifulSoupUtils:
             webpage = urlopen(req).read()
             soup = BeautifulSoup(webpage, 'html.parser')
         else:
+            options = Options()
+            options.add_argument('--no-sandbox')
+            options.add_argument("--headless")
+            options.add_argument('--disable-dev-shm-usage')
             driver = webdriver.Chrome(
                 service=ChromeService(ChromeDriverManager().install()))
             # if scroll == True:
@@ -248,4 +253,3 @@ def create_document(title, body):
     document_name = f"""{title}-{created_at}.docx"""
     document.save(document_name)
     return document_name
-

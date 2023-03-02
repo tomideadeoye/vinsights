@@ -14,7 +14,7 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
 def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
-    print(company_name, company_website, pitch_deck, email_to)
+    
     directory = './mediafiles/Africa/'
     pitch_deck = 'Pivo Pitch Deck - Main (1).pdf'
 
@@ -22,6 +22,7 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
     pitch_deck_content = ' '.join(
         [page.extract_text().strip() for page in reader.pages])
 
+    print(company_name, company_website, pitch_deck, email_to)
     website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
         company_website, 'incognitp', False)
     print('website_content', website_content)
