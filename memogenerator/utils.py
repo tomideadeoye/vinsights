@@ -84,7 +84,8 @@ class TomideBeautifulSoupUtils:
             options.add_argument("--headless")
             options.add_argument('--disable-dev-shm-usage')
             driver = webdriver.Chrome(
-                service=ChromeService(ChromeDriverManager().install()))
+                service=ChromeService(ChromeDriverManager().install()),
+                options=options)
             # if scroll == True:
             #     SCROLL_PAUSE_TIME = 10
             #     last_height = driver.execute_script(
