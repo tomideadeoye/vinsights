@@ -1,4 +1,3 @@
-from rest_framework.viewsets import ViewSet
 from rest_framework import permissions
 from memogenerator import serializers
 from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
@@ -19,13 +18,13 @@ class CompanyDataView(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        # serializer.save()
 
         # Extract data from the request
         name = serializer.validated_data['name']
         emailTo = serializer.validated_data['emailTo']
         website = serializer.validated_data['website']
-        pitch_uploaded = pdf_file = request.FILES['pitch_uploaded']
+        pitch_uploaded = request.FILES['pitch_uploaded']
 
         print(pitch_uploaded)
 
