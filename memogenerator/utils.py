@@ -19,11 +19,13 @@ import dns.resolver
 import socket
 from dotenv import load_dotenv
 from docx import Document
+
 load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
 class TomideBeautifulSoupUtils:
+
     def __init__(self, url, type, scroll):
         self.url = url
         self.type = type
@@ -50,15 +52,23 @@ class TomideBeautifulSoupUtils:
                 all_links.append(url + link.replace('/', ''))
 
         # remove links starting with / or #
-        all_links = [link for link in all_links if link[0]
-                     != '/' and link[0] != '#']
+        all_links = [
+            link for link in all_links if link[0] != '/' and link[0] != '#'
+        ]
 
         internal_links = [
-            internal_link for internal_link in all_links if url in internal_link]
+            internal_link for internal_link in all_links
+            if url in internal_link
+        ]
         external_links = [
-            external_link for external_link in all_links if url not in external_link]
-        socials = ['facebook', 'twitter', 'instagram', 'linkedin', 'youtube',
-                   'pinterest', 'tumblr', 'reddit', 'snapchat', 'whatsapp', 'telegram', 't.me', 'wa.me']
+            external_link for external_link in all_links
+            if url not in external_link
+        ]
+        socials = [
+            'facebook', 'twitter', 'instagram', 'linkedin', 'youtube',
+            'pinterest', 'tumblr', 'reddit', 'snapchat', 'whatsapp',
+            'telegram', 't.me', 'wa.me'
+        ]
         social_media_links = []
         for link in all_links:
             for social in socials:
@@ -80,12 +90,11 @@ class TomideBeautifulSoupUtils:
             soup = BeautifulSoup(webpage, 'html.parser')
         else:
             options = Options()
-            options.add_argument('--no-sandbox')
+            # options.add_argument('--no-sandbox')
             options.add_argument("--headless")
-            options.add_argument('--disable-dev-shm-usage')
+            # options.add_argument('--disable-dev-shm-usage')
             driver = webdriver.Chrome(
-                service=ChromeService(ChromeDriverManager().install()),
-                options=options)
+                service=ChromeService(ChromeDriverManager().install()))
             # if scroll == True:
             #     SCROLL_PAUSE_TIME = 10
             #     last_height = driver.execute_script(
@@ -108,6 +117,7 @@ class TomideBeautifulSoupUtils:
 
 
 class TomsEmailUtilities:
+
     def __init__(self, firstname, lastname, company_domain):
         self.firstname = firstname
         self.lastname = lastname
@@ -180,22 +190,22 @@ class TomsEmailUtilities:
         # adeoyet@merislabs.com
         emailList.append(lastname + "." + firstname[0] + "@" + company_domain)
 
-        emailList.append(firstname[0] + lastname[0] +
-                         "@" + company_domain)  # ta@merislabs.com
-        emailList.append(lastname[0] + firstname[0] +
-                         "@" + company_domain)  # ta@merislabs.com
+        emailList.append(firstname[0] + lastname[0] + "@" +
+                         company_domain)  # ta@merislabs.com
+        emailList.append(lastname[0] + firstname[0] + "@" +
+                         company_domain)  # ta@merislabs.com
 
-        emailList.append(lastname[0] + "." + firstname[0] +
-                         "@" + company_domain)  # t.a@meris.com
+        emailList.append(lastname[0] + "." + firstname[0] + "@" +
+                         company_domain)  # t.a@meris.com
         # t.a@meris.com
-        emailList.append(firstname[0] + "." +
-                         lastname[0] + "@" + company_domain)
+        emailList.append(firstname[0] + "." + lastname[0] + "@" +
+                         company_domain)
 
         valid = []
         for email in emailList:
             # print position of email in array
-            print('Validating ', emailList.index(
-                email) + 1, ' of ', len(emailList))
+            print('Validating ',
+                  emailList.index(email) + 1, ' of ', len(emailList))
             valid.append(cls.mail_checker(email))
 
         valid = [item for item in valid if item is not None]
@@ -208,7 +218,8 @@ class TomsEmailUtilities:
         email_sender = os.getenv('email_sender')
         email_password = os.getenv('email_password')
         em = EmailMessage()
-        em['From'], em['To'], em['Subject'] = email_sender, email_receiver, subject
+        em['From'], em['To'], em[
+            'Subject'] = email_sender, email_receiver, subject
         em.set_content(body)
 
         for path in files:
@@ -216,8 +227,10 @@ class TomsEmailUtilities:
                 file_data = file.read()
                 file_name = file.name.split('/')[-1]
 
-            em.add_attachment(file_data, maintype='application',
-                              subtype='octet-stream', filename=file_name)
+            em.add_attachment(file_data,
+                              maintype='application',
+                              subtype='octet-stream',
+                              filename=file_name)
 
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
@@ -233,8 +246,10 @@ def google_search(query_for_google):
     options = {'method': 'get', 'contentType': 'application/json'}
 
     for search_key in search_keys:
-        google_response = requests.get("https://www.googleapis.com/customsearch/v1?key=" +
-                                       search_key+"&q="+query_for_google+"&cx="+searchEngineId, options).json()
+        google_response = requests.get(
+            "https://www.googleapis.com/customsearch/v1?key=" + search_key +
+            "&q=" + query_for_google + "&cx=" + searchEngineId,
+            options).json()
         if 'items' in google_response:
             return google_response['items']
         else:
@@ -244,13 +259,33 @@ def google_search(query_for_google):
 
 
 def create_document(title, body):
-    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     document = Document()
     document.add_heading(title, 1)
     document.add_paragraph(body)
     document.add_page_break()
     document.add_paragraph('Created at ' + created_at + ' by Tomide Adeoye')
+
     document_name = f"""{title}-{created_at}.docx"""
     document.save(document_name)
+
     return document_name
+
+
+def replace_irrelevant_words(text):
+    things_to_replace = [
+        'all rights reserved',
+        '©',
+        '®',
+        '™',
+        'incognitp',
+        '<b>',
+        '</b>',
+    ]
+
+    for thing in things_to_replace:
+        text = text.replace(thing, '')
+
+    return text

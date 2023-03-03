@@ -1,53 +1,49 @@
-import openai
-from PyPDF2 import PdfReader
 import re
 import os
 
-from memogenerator.utils import TomideBeautifulSoupUtils, google_search, TomsEmailUtilities, create_document
+import openai
+from PyPDF2 import PdfReader
 from dotenv import load_dotenv
-
+from memogenerator.utils import TomideBeautifulSoupUtils, google_search, TomsEmailUtilities, create_document, replace_irrelevant_words
 
 load_dotenv()
-
-
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
 def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
-
-    directory = './mediafiles/Africa/'
-    # pitch_deck = 'Pivo Pitch Deck - Main (1).pdf'
-    pitch_deck = pitch_deck
-
-    reader = PdfReader(f'{directory}{pitch_deck}')
-    pitch_deck_content = ' '.join(
-        [page.extract_text().strip() for page in reader.pages])
-
     print(company_name, company_website, pitch_deck, email_to)
-    # website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
-    #     company_website, 'incognitp', False)
+    directory = './mediafiles/'
 
-    website_content = ['']
-    print('website_content', website_content)
+    pitch_deck_content = ' '.join(
+        [page.extract_text() for page in PdfReader(pitch_deck).pages])
+
+    website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
+        company_website, 'incognitp', False)
+
     dataset = pitch_deck_content + website_content[0].text.strip()
 
     print(
-        f'Deck: {len(pitch_deck_content)} | Website: {len(website_content[0].text.strip())} | Dataset: {len(dataset)} / Token: {len(dataset) / 4}')
+        f'Deck: {len(pitch_deck_content)} | Website: {len(website_content[0].text.strip())} | Dataset: {len(dataset)} / Token: {len(dataset) / 4}'
+    )
 
-    dataset = ' '.join([dataset.replace(thing, '') for thing in [
-                       '\n', 'all rights reserved', '©', '®', '™', ]])
     dataset = ' '.join(dataset.split()[0:1200])
     emails = re.findall(r'[\w\.-]+@[\w\.-]+', dataset)
 
-    founder_google_search = ''.join(founder['snippet'] + ' ' + founder['htmlSnippet']
-                                    for founder in google_search(f'{company_name} startup founders'))
-    founder_google_search = founder_google_search.strip().replace('<b>',
-                                                                  '').replace('</b>', '')
+    founder_google_search = ''.join([
+        founder['snippet'] + ' ' + founder['htmlSnippet']
+        for founder in google_search(f'{company_name} startup founders')
+    ])
+    founder_google_search = replace_irrelevant_words(founder_google_search)
 
-    funding_raise_google_search = ''.join(
-        funding['snippet'] + ' ' + funding['htmlSnippet'] for funding in google_search(f'{company_name} funding raise'))
-    funding_raise_google_search = funding_raise_google_search.strip().replace('</b>',
-                                                                              '').replace('<b>', '')
+    funding_raise_google_search = google_search(
+        f'{company_name} funding raise')
+
+    funding_raise_google_search = ''.join([
+        funding['snippet'] + ' ' + funding['htmlSnippet']
+        for funding in funding_raise_google_search
+    ])
+    funding_raise_google_search = replace_irrelevant_words(
+        funding_raise_google_search)
 
     class Prompts:
         what_they_do = "extract what the company does from the data here "
@@ -77,114 +73,111 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
         location = "extract the company's location from the data here"
 
     class QueryGpt:
+
         def __init__(self, query, dataset):
             self.query = query
             self.dataset = dataset
 
         def query_gpt(self):
-            response = openai.Completion.create(
-                engine="text-davinci-003",
-                prompt=self.query + '' + self.dataset,
-                temperature=0.7,
-                max_tokens=1000,
-                top_p=1,
-                frequency_penalty=0,
-                presence_penalty=0)
+            response = openai.Completion.create(engine="text-davinci-003",
+                                                prompt=self.query + '' +
+                                                self.dataset,
+                                                temperature=0.7,
+                                                max_tokens=1000,
+                                                top_p=1,
+                                                frequency_penalty=0,
+                                                presence_penalty=0)
             print(response.choices[0].text.strip())
             return response.choices[0].text.strip() + '\n'
 
-    class MemoCreator:
-        def memoCreate():
-
-            memo = f'''
+    def memoCreate():
+        memo = f'''
 <=====================INVESTMENT MEMO=====================> \n
 
 WHAT THEY DO:
-=========================================================== \n 
-{QueryGpt(Prompts.what_they_do, dataset).query_gpt()}  
+--------------------------------------------------------- \n
+{QueryGpt(Prompts.what_they_do, dataset).query_gpt()}
 
-DECK | WEBSITE 
-=========================================================== \n 
-{company_website if company_website else QueryGpt(Prompts.website, dataset).query_gpt()}
+DECK | WEBSITE
+--------------------------------------------------------- \n
+{company_website if company_website else QueryGpt(
+    Prompts.website, dataset).query_gpt()}
 
 ROUND DETAILS
-===========================================================  \n
+---------------------------------------------------------  \n
 Terms: How much are we investing and what valuation?
 Stage: Pre-Seed/Seed/Series ABC?
 Co-Investors: If any?
-Information Rights: 
+Information Rights:
 Pro-Rata:
 City: {QueryGpt(Prompts.location, dataset).query_gpt()}
 Sex:
-Industry: {QueryGpt(Prompts.industry, dataset).query_gpt()}   
+Industry: {QueryGpt(Prompts.industry, dataset).query_gpt()}
 
 TRACTION AND PROGRESS SO FAR:
-=========================================================== \n 
+--------------------------------------------------------- \n
 {QueryGpt(Prompts.traction, dataset).query_gpt()}
 
-Founders: Founder Info from Linkedin and Execution Ability
-Are they repeat founders? Do they have other things going on? Do they have what it takes to achieve their vision?
-# pull data from Linkedin previously listed companies 
-{QueryGpt(Prompts.team, founder_google_search).query_gpt()}
-
 BUSINESS MODEL
-=========================================================== \n
-{QueryGpt(Prompts.business_model, dataset).query_gpt()} 
+--------------------------------------------------------- \n
+{QueryGpt(Prompts.business_model, dataset).query_gpt()}
 
-FOUNDER'S VISION
-=========================================================== \n
-{QueryGpt(Prompts.founder_vision, founder_google_search).query_gpt()} 
+FOUNDERS AND VISION
+--------------------------------------------------------- \n
+{QueryGpt(Prompts.team, founder_google_search).query_gpt()}
+{QueryGpt(Prompts.founder_vision, founder_google_search).query_gpt()}
 
 FUNDING:
-=========================================================== \n
-{QueryGpt(Prompts.funding, funding_raise_google_search).query_gpt()} 
+--------------------------------------------------------- \n
+{QueryGpt(Prompts.funding, funding_raise_google_search).query_gpt()}
 
 USE OF FUNDS:
-=========================================================== \n
+--------------------------------------------------------- \n
 {QueryGpt(Prompts.use_of_funds, dataset).query_gpt()}
 
 PRODUCT/SERVICE:
-=========================================================== \n
-{QueryGpt(Prompts.products, dataset).query_gpt()} 
+--------------------------------------------------------- \n
+{QueryGpt(Prompts.products, dataset).query_gpt()}
 
 CONTACTS:
-=========================================================== \n
-{QueryGpt(Prompts.contact, dataset).query_gpt()} 
+--------------------------------------------------------- \n
+{QueryGpt(Prompts.contact, dataset).query_gpt()}
 emails: {' | '.join(emails)}
 
 MARKET OUTLOOK:
-=========================================================== \n
+--------------------------------------------------------- \n
 {QueryGpt(Prompts.market, dataset).query_gpt()}
 
-COMPETITION & DEFENSIBILITY:
-=========================================================== \n
-Who is their competition? How do they compare against each other? What is unique about this company that makes them stand out in the market? Feel free to use a table here to help compare
-# go online to fetch the data here and use exiting companies in the database
-
 RISKS:
-=========================================================== \n
+--------------------------------------------------------- \n
 {QueryGpt(Prompts.risks, dataset).query_gpt()}
 
 SOCIALS:
-=========================================================== \n
+--------------------------------------------------------- \n
 {' | '.join(website_content[1]['social_media_links'])}
 
 OTHER LINKS:
-=========================================================== \n
+--------------------------------------------------------- \n
 {' | '.join(website_content[1]['internal_links'])}
 
     '''
 
-            return memo
+        return memo
 
-    response = MemoCreator.memoCreate()
+    response = memoCreate()
+
     if email_to:
-        subject = f'Investment Memo for {company_name}'
+        subject = f'''Investment Memo: {company_name}'''.upper()
+        TomsEmailUtilities.send_email(email_to, subject, response,
+                                      [create_document(subject, response)])
 
-        document_name = create_document(
-            f'''{company_name.upper()} Investment Memo Draft''', subject)
+    return response
 
-        TomsEmailUtilities.send_email(
-            email_to, subject, response, [document_name])
 
-    return MemoCreator.memoCreate()
+# COMPETITION & DEFENSIBILITY:
+# --------------------------------------------------------- \n
+# Who is their competition? How do they compare against each other? What is unique about this company that makes them stand out in the market? Feel free to use a table here to help compare
+# # go online to fetch the data here and use exiting companies in the database
+
+# Execution ability
+# are they repeat founders? Do their background match the business

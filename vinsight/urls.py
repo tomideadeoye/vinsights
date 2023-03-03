@@ -19,13 +19,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from memogenerator.views import CompanyDataView
 
-
 router = routers.DefaultRouter()
 
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
-    path('upload/', CompanyDataView.as_view(), name='upload'),
-
-
+    path('upload/',
+         CompanyDataView.as_view({
+             'post': 'create',
+             'get': 'list',
+         }),
+         name='upload'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
