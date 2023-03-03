@@ -89,10 +89,10 @@ class TomideBeautifulSoupUtils:
             webpage = urlopen(req).read()
             soup = BeautifulSoup(webpage, 'html.parser')
         else:
-            options = Options()
-            # options.add_argument('--no-sandbox')
-            options.add_argument("--headless")
-            # options.add_argument('--disable-dev-shm-usage')
+            options = webdriver.ChromeOptions()
+            options.headless = True
+            options.page_load_strategy = 'none'
+
             driver = webdriver.Chrome(
                 service=ChromeService(ChromeDriverManager().install()))
             # if scroll == True:
