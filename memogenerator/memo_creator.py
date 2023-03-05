@@ -21,7 +21,7 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
         [page.extract_text() for page in PdfReader(pitch_deck).pages])
 
     website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
-        company_website, 'nbkmum')
+        company_website, 'static')
 
     dataset = pitch_deck_content + website_content[0].text
 

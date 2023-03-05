@@ -86,12 +86,11 @@ class TomideBeautifulSoupUtils:
 
     @classmethod
     def tomide_bs4_make_soup(cls, url, type):
-        soup = None
-
         if type == "static":
             req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             webpage = urlopen(req).read()
             soup = BeautifulSoup(webpage, 'html.parser')
+            return soup, cls.get_all_links(soup, url)
         elif type == "chromium":
             driver = webdriver.Chrome(service=ChromiumService(
                 ChromeDriverManager(
