@@ -101,16 +101,11 @@ class TomideBeautifulSoupUtils:
             driver.quit()
             return soup, cls.get_all_links(soup, url)
         elif type == "firefox":
+
+            from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
             from selenium import webdriver
-            from selenium.webdriver.firefox.service import Service as FirefoxService
-            from webdriver_manager.firefox import GeckoDriverManager
-
-            options = webdriver.FirefoxOptions()
-            options.headless = True
-
-            driver = webdriver.Firefox(
-                service=FirefoxService(GeckoDriverManager().install()))
-            driver.get(url)
+            firefox_binary = FirefoxBinary()
+            driver = webdriver.Firefox(firefox_binary=firefox_binary)
             soup = BeautifulSoup(driver.page_source, 'html.parser')
             driver.quit()
             return soup, cls.get_all_links(soup, url)
