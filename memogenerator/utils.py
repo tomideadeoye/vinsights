@@ -111,7 +111,7 @@ class TomideBeautifulSoupUtils:
             options = webdriver.ChromeOptions()
             options.headless = True
             options.page_load_strategy = 'none'
-            service = ChromeService('./chromedriver.exe')
+            service = ChromeService('./chromedriver')
 
             driver = webdriver.Chrome(
                 service=service,
