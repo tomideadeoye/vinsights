@@ -20,18 +20,13 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
     pitch_deck_content = ' '.join(
         [page.extract_text() for page in PdfReader(pitch_deck).pages])
 
-    session = HTMLSession()
-    r = session.get(company_website)
-    r.html.render()
-    links = r.html.absolute_links
+    website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
+        company_website, 'chromium')
 
-    soup = BeautifulSoup(r.html.html, 'html.parser')
-    print(soup.text)
-
-    dataset = pitch_deck_content + soup.text
+    dataset = pitch_deck_content + website_content[0].text
 
     print(
-        f'Deck: {len(pitch_deck_content)} | Website: {len(soup.text)} | Dataset: {len(dataset)} / Token: {len(dataset) / 4}'
+        f'Deck: {len(pitch_deck_content)} | Website: {len(website_content[0].text)} | Dataset: {len(dataset)} / Token: {len(dataset) / 4}'
     )
 
     dataset = ' '.join(dataset.split()[0:1200])

@@ -1,3 +1,7 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromiumService
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.utils import ChromeType
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -81,13 +85,22 @@ class TomideBeautifulSoupUtils:
         }
 
     @classmethod
-    def tomide_bs4_make_soup(cls, url, type, scroll):
+    def tomide_bs4_make_soup(cls, url, type):
         soup = None
 
         if type == "static":
             req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             webpage = urlopen(req).read()
             soup = BeautifulSoup(webpage, 'html.parser')
+        elif type == "chromium":
+            driver = webdriver.Chrome(service=ChromiumService(
+                ChromeDriverManager(
+                    chrome_type=ChromeType.CHROMIUM).install()))
+            driver.get(url)
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
+            driver.quit()
+            return soup, cls.get_all_links(soup, url)
+
         else:
             options = webdriver.ChromeOptions()
             options.headless = True
