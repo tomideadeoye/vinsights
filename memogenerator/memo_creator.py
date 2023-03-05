@@ -1,9 +1,13 @@
 import re
 import os
 
+import re
+from bs4 import BeautifulSoup
+from requests_html import HTMLSession, AsyncHTMLSession
 import openai
 from PyPDF2 import PdfReader
 from dotenv import load_dotenv
+from requests_html import HTMLSession, AsyncHTMLSession
 from memogenerator.utils import TomideBeautifulSoupUtils, google_search, TomsEmailUtilities, create_document, replace_irrelevant_words
 
 load_dotenv()
@@ -12,18 +16,22 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
     print(company_name, company_website, pitch_deck, email_to)
-    directory = './mediafiles/'
 
     pitch_deck_content = ' '.join(
         [page.extract_text() for page in PdfReader(pitch_deck).pages])
 
-    website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
-        company_website, 'incognitp', False)
+    session = HTMLSession()
+    r = session.get(company_website)
+    r.html.render()
+    links = r.html.absolute_links
 
-    dataset = pitch_deck_content + website_content[0].text.strip()
+    soup = BeautifulSoup(r.html.html, 'html.parser')
+    print(soup.text)
+
+    dataset = pitch_deck_content + soup.text
 
     print(
-        f'Deck: {len(pitch_deck_content)} | Website: {len(website_content[0].text.strip())} | Dataset: {len(dataset)} / Token: {len(dataset) / 4}'
+        f'Deck: {len(pitch_deck_content)} | Website: {len(soup.text)} | Dataset: {len(dataset)} / Token: {len(dataset) / 4}'
     )
 
     dataset = ' '.join(dataset.split()[0:1200])
@@ -152,13 +160,7 @@ RISKS:
 --------------------------------------------------------- \n
 {QueryGpt(Prompts.risks, dataset).query_gpt()}
 
-SOCIALS:
---------------------------------------------------------- \n
-{' | '.join(website_content[1]['social_media_links'])}
 
-OTHER LINKS:
---------------------------------------------------------- \n
-{' | '.join(website_content[1]['internal_links'])}
 
     '''
 
@@ -181,3 +183,11 @@ OTHER LINKS:
 
 # Execution ability
 # are they repeat founders? Do their background match the business
+
+# SOCIALS:
+# --------------------------------------------------------- \n
+# {' | '.join(website_content[1]['social_media_links'])}
+
+# OTHER LINKS:
+# --------------------------------------------------------- \n
+# # {' | '.join(website_content[1]['internal_links'])}
