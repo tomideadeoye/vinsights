@@ -97,7 +97,6 @@ class TomideBeautifulSoupUtils:
                     chrome_type=ChromeType.CHROMIUM).install()))
             driver.get(url)
             soup = BeautifulSoup(driver.page_source, 'html.parser')
-            driver.quit()
             return soup, cls.get_all_links(soup, url)
         elif type == "firefox":
             from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
