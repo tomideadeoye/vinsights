@@ -16,7 +16,6 @@ import smtplib
 import ssl
 from email.message import EmailMessage
 import datetime
-from selenium import webdriver
 import re
 import smtplib
 import dns.resolver
@@ -101,9 +100,7 @@ class TomideBeautifulSoupUtils:
             driver.quit()
             return soup, cls.get_all_links(soup, url)
         elif type == "firefox":
-
             from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-            from selenium import webdriver
             firefox_binary = FirefoxBinary()
             driver = webdriver.Firefox(firefox_binary=firefox_binary)
             soup = BeautifulSoup(driver.page_source, 'html.parser')
