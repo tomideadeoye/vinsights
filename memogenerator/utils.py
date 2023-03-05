@@ -112,11 +112,12 @@ class TomideBeautifulSoupUtils:
             options.headless = True
             options.page_load_strategy = 'none'
             service = ChromeService('./chromedriver')
+            # service=service,
+            # options=options,
+            # executable_path='./chromedriver'
 
             driver = webdriver.Chrome(
-                service=service,
-                options=options,
-                executable_path='./chromedriver')
+              )
             # if scroll == True:
             #     SCROLL_PAUSE_TIME = 10
             #     last_height = driver.execute_script(
