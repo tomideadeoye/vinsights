@@ -3,11 +3,9 @@ import os
 
 import re
 from bs4 import BeautifulSoup
-from requests_html import HTMLSession, AsyncHTMLSession
 import openai
 from PyPDF2 import PdfReader
 from dotenv import load_dotenv
-from requests_html import HTMLSession, AsyncHTMLSession
 from memogenerator.utils import TomideBeautifulSoupUtils, google_search, TomsEmailUtilities, create_document, replace_irrelevant_words
 
 load_dotenv()
@@ -21,7 +19,7 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
         [page.extract_text() for page in PdfReader(pitch_deck).pages])
 
     website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
-        company_website, 'static')
+        company_website, 'else')
 
     dataset = pitch_deck_content + website_content[0].text
 

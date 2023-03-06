@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
 from PyPDF2 import PdfReader
-import chromedriver_binary 
+import chromedriver_binary
 from datetime import datetime
 import openai
 import os
@@ -109,27 +109,11 @@ class TomideBeautifulSoupUtils:
         else:
             options = webdriver.ChromeOptions()
             options.headless = True
-            options.page_load_strategy = 'none'
-            service = ChromeService('./chromedriver')
-            # service=service,
-            # options=options,
-            # executable_path='./chromedriver'
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-dev-shm-usage')
 
             driver = webdriver.Chrome(
-              )
-            # if scroll == True:
-            #     SCROLL_PAUSE_TIME = 10
-            #     last_height = driver.execute_script(
-            #         "return document.body.scrollHeight")  # Get scroll height
-            #     while True:
-            #         driver.execute_script(  # Scroll down to bottom
-            #             "window.scrollTo(0, document.body.scrollHeight);")
-            #         time.sleep(SCROLL_PAUSE_TIME)  # Wait to load page
-            #         new_height = driver.execute_script(  # Calculate new scroll height and compare with last scroll height
-            #             "return document.body.scrollHeight")
-            #         if new_height == last_height:
-            #             break
-            #         last_height = new_height
+                executable_path='/usr/local/bin/chromedriver', options=options)
 
             driver.get(url)
             soup = BeautifulSoup(driver.page_source, 'html.parser')
