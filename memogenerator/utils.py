@@ -112,8 +112,8 @@ class TomideBeautifulSoupUtils:
             options.add_argument('--no-sandbox')
             options.add_argument('--disable-dev-shm-usage')
 
-            driver = webdriver.Chrome(
-                executable_path='/usr/local/bin/chromedriver', options=options)
+            driver = webdriver.Chrome(executable_path='/usr/bin/google-chrome',
+                                      options=options)
 
             driver.get(url)
             soup = BeautifulSoup(driver.page_source, 'html.parser')
