@@ -112,7 +112,7 @@ class TomideBeautifulSoupUtils:
             options.add_argument('--no-sandbox')
             options.add_argument('--disable-dev-shm-usage')
 
-            driver = webdriver.Chrome(executable_path='/usr/bin/google-chrome',
+            driver = webdriver.Chrome(ChromeDriverManager().install(),
                                       options=options)
 
             driver.get(url)
