@@ -30,7 +30,6 @@ INSTALLED_APPS = [
     'vinsight',
     'corsheaders',
     'memogenerator.apps.MemogeneratorConfig',
-    'memogenerator.scraper',
 ]
 
 MIDDLEWARE = [
