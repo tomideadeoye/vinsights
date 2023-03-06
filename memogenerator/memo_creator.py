@@ -32,11 +32,10 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
             'headless': True,
             'handleSIGINT': False,
             'handleSIGTERM': False,
-            'handleSIGHUP': False
-        })
-        session._browser = await pyppeteer.launch({
+            'handleSIGHUP': False,
             'autoClose': False,
         })
+        session._browser = browser
 
         resp = await session.get(url)
         await resp.html.arender(timeout=60)
