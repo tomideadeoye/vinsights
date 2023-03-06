@@ -179,7 +179,6 @@ RISKS:
         TomsEmailUtilities.send_email(email_to, subject, response,
                                       [create_document(subject, response)])
 
-    return response
 
 
 # COMPETITION & DEFENSIBILITY:

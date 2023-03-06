@@ -29,7 +29,7 @@ class CompanyDataView(viewsets.ModelViewSet):
         print(pitch_uploaded)
 
         # do something with the data
-        response = generate_mad_memo(
+        generate_mad_memo(
             name,
             website,
             pitch_uploaded,
@@ -37,6 +37,6 @@ class CompanyDataView(viewsets.ModelViewSet):
         )
 
         headers = self.get_success_headers(serializer.data)
-        return Response(response,
+        return Response('We will send you an email shortly',
                         status=status.HTTP_201_CREATED,
                         headers=headers)
