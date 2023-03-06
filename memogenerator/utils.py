@@ -1,9 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromiumService
+from selenium.webdriver.chrome.service import Service as BraveService
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.utils import ChromeType
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
 from PyPDF2 import PdfReader
 import chromedriver_binary
@@ -105,6 +105,10 @@ class TomideBeautifulSoupUtils:
             soup = BeautifulSoup(driver.page_source, 'html.parser')
             driver.quit()
             return soup, cls.get_all_links(soup, url)
+        
+        elif type == "brave":
+
+            driver = webdriver.Chrome(service=BraveService(ChromeDriverManager(chrome_type=ChromeType.BRAVE).install()))
 
         else:
             options = webdriver.ChromeOptions()
