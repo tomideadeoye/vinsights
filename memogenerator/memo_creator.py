@@ -22,9 +22,6 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
     pitch_deck_content = ' '.join(
         [page.extract_text() for page in PdfReader(pitch_deck).pages])
 
-    # website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
-    #     company_website, 'static')
-    # print(website_content)
     async def load_page_helper(url: str):
         """Helper to parse obfuscated / JS-loaded profiles like Facebook.
         We need a separate function to handle requests-html's async nature
@@ -37,7 +34,9 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
             'handleSIGTERM': False,
             'handleSIGHUP': False
         })
-        session._browser = browser
+        session._browser = await pyppeteer.launch({
+            'autoClose': False,
+        })
 
         resp = await session.get(url)
         await resp.html.arender(timeout=60)
