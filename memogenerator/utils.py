@@ -102,13 +102,14 @@ class TomideBeautifulSoupUtils:
             from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
             firefox_binary = FirefoxBinary()
             driver = webdriver.Firefox(firefox_binary=firefox_binary)
+
+        elif type == "brave":
+
+            driver = webdriver.Chrome(service=BraveService(
+                ChromeDriverManager(chrome_type=ChromeType.BRAVE).install()))
             soup = BeautifulSoup(driver.page_source, 'html.parser')
             driver.quit()
             return soup, cls.get_all_links(soup, url)
-        
-        elif type == "brave":
-
-            driver = webdriver.Chrome(service=BraveService(ChromeDriverManager(chrome_type=ChromeType.BRAVE).install()))
 
         else:
             options = webdriver.ChromeOptions()
