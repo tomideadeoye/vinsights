@@ -46,19 +46,8 @@ class TomideBeautifulSoupUtils:
                         class_list.append(tag['class'][0])
         return class_list
 
-    @classmethod
-    def get_all_links(cls, soup, url):
-        all_links = soup.find_all('a')
-        all_links = [link['href'] for link in all_links]
-
-        for link in all_links:
-            if link[0] == '/':
-                all_links.append(url + link.replace('/', ''))
-
-        # remove links starting with / or #
-        all_links = [
-            link for link in all_links if link[0] != '/' and link[0] != '#'
-        ]
+    @staticmethod
+    def get_all_links(all_links, url):
 
         internal_links = [
             internal_link for internal_link in all_links
@@ -90,25 +79,6 @@ class TomideBeautifulSoupUtils:
             req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             webpage = urlopen(req).read()
             soup = BeautifulSoup(webpage, 'html.parser')
-            return soup, cls.get_all_links(soup, url)
-        elif type == "chromium":
-            driver = webdriver.Chrome(service=ChromiumService(
-                ChromeDriverManager(
-                    chrome_type=ChromeType.CHROMIUM).install()))
-            driver.get(url)
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
-            return soup, cls.get_all_links(soup, url)
-        elif type == "firefox":
-            from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-            firefox_binary = FirefoxBinary()
-            driver = webdriver.Firefox(firefox_binary=firefox_binary)
-
-        elif type == "brave":
-
-            driver = webdriver.Chrome(service=BraveService(
-                ChromeDriverManager(chrome_type=ChromeType.BRAVE).install()))
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
-            driver.quit()
             return soup, cls.get_all_links(soup, url)
 
         else:

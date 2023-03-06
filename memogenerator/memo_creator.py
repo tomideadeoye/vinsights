@@ -1,5 +1,9 @@
+import asyncio
 import re
 import os
+from threading import Thread
+import pyppeteer
+from requests_html import HTMLSession, AsyncHTMLSession
 
 import re
 from bs4 import BeautifulSoup
@@ -18,13 +22,43 @@ def generate_mad_memo(company_name, company_website, pitch_deck, email_to):
     pitch_deck_content = ' '.join(
         [page.extract_text() for page in PdfReader(pitch_deck).pages])
 
-    website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
-        company_website, 'brave')
+    # website_content = TomideBeautifulSoupUtils.tomide_bs4_make_soup(
+    #     company_website, 'static')
+    # print(website_content)
+    async def load_page_helper(url: str):
+        """Helper to parse obfuscated / JS-loaded profiles like Facebook.
+        We need a separate function to handle requests-html's async nature
+        in Django's event loop."""
+        session = AsyncHTMLSession()
+        browser = await pyppeteer.launch({
+            'ignoreHTTPSErrors': True,
+            'headless': True,
+            'handleSIGINT': False,
+            'handleSIGTERM': False,
+            'handleSIGHUP': False
+        })
+        session._browser = browser
 
-    dataset = pitch_deck_content + website_content[0].text
+        resp = await session.get(url)
+        await resp.html.arender(timeout=60)
+        await session.close()
+        return resp
+
+    resp = asyncio.run(load_page_helper(company_website))
+
+    website_content = resp.html.html
+    links = TomideBeautifulSoupUtils.get_all_links(
+        resp.html.absolute_links,
+        company_website.split('//')[1].split('/')[0]
+        if '//' in company_website else company_website)
+
+    website_content = BeautifulSoup(website_content, 'html.parser')
+    website_content = website_content.text
+
+    dataset = pitch_deck_content + website_content
 
     print(
-        f'Deck: {len(pitch_deck_content)} | Website: {len(website_content[0].text)} | Dataset: {len(dataset)} / Token: {len(dataset) / 4}'
+        f'Deck: {len(pitch_deck_content)} | Website: {len(website_content)} | Dataset: {len(dataset)} / Token: {len(dataset) / 4}'
     )
 
     dataset = ' '.join(dataset.split()[0:1200])
@@ -153,6 +187,14 @@ RISKS:
 --------------------------------------------------------- \n
 {QueryGpt(Prompts.risks, dataset).query_gpt()}
 
+# SOCIALS:
+# --------------------------------------------------------- \n
+# {' | '.join(links['social_media_links'])}
+
+# OTHER LINKS:
+# --------------------------------------------------------- \n
+# # {' | '.join(links['internal_links'])}
+
 
 
     '''
@@ -176,11 +218,3 @@ RISKS:
 
 # Execution ability
 # are they repeat founders? Do their background match the business
-
-# SOCIALS:
-# --------------------------------------------------------- \n
-# {' | '.join(website_content[1]['social_media_links'])}
-
-# OTHER LINKS:
-# --------------------------------------------------------- \n
-# # {' | '.join(website_content[1]['internal_links'])}
